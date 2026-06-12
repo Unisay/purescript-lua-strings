@@ -15,7 +15,34 @@ import Type.Proxy (Proxy(..))
 
 testNonEmptyStringCodeUnits :: Effect Unit
 testNonEmptyStringCodeUnits = do
+  testFromCharArray
+  testFromNonEmptyCharArray
+  testSingleton
+  testCons
+  testSnoc
+  testFromFoldable1
+  testCharAt
+  testCharCodeAt
+  testToChar
+  testToCharArray
+  testToNonEmptyCharArray
+  testUncons
+  testTakeWhile
+  testDropWhile
+  testIndexOf
+  testIndexOf'
+  testLastIndexOf
+  testLastIndexOf'
+  testLength
+  testTake
+  testTakeRight
+  testDrop
+  testDropRight
+  testCountPrefix
+  testSplitAt
 
+testFromCharArray :: Effect Unit
+testFromCharArray = do
   log "fromCharArray"
   assertEqual
     { actual: NESCU.fromCharArray []
@@ -26,18 +53,24 @@ testNonEmptyStringCodeUnits = do
     , expected: Just (nes (Proxy :: Proxy "ab"))
     }
 
+testFromNonEmptyCharArray :: Effect Unit
+testFromNonEmptyCharArray = do
   log "fromNonEmptyCharArray"
   assertEqual
     { actual: NESCU.fromNonEmptyCharArray (NEA.singleton 'b')
     , expected: NESCU.singleton 'b'
     }
 
+testSingleton :: Effect Unit
+testSingleton = do
   log "singleton"
   assertEqual
     { actual: NESCU.singleton 'a'
     , expected: nes (Proxy :: Proxy "a")
     }
 
+testCons :: Effect Unit
+testCons = do
   log "cons"
   assertEqual
     { actual: NESCU.cons 'a' "bc"
@@ -48,6 +81,8 @@ testNonEmptyStringCodeUnits = do
     , expected: nes (Proxy :: Proxy "a")
     }
 
+testSnoc :: Effect Unit
+testSnoc = do
   log "snoc"
   assertEqual
     { actual: NESCU.snoc 'c' "ab"
@@ -58,6 +93,8 @@ testNonEmptyStringCodeUnits = do
     , expected: nes (Proxy :: Proxy "a")
     }
 
+testFromFoldable1 :: Effect Unit
+testFromFoldable1 = do
   log "fromFoldable1"
   assertEqual
     { actual: NESCU.fromFoldable1 (nea ['a'])
@@ -68,6 +105,8 @@ testNonEmptyStringCodeUnits = do
     , expected: nes (Proxy :: Proxy "abc")
     }
 
+testCharAt :: Effect Unit
+testCharAt = do
   log "charAt"
   assertEqual
     { actual: NESCU.charAt 0 (nes (Proxy :: Proxy "a"))
@@ -98,6 +137,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testCharCodeAt :: Effect Unit
+testCharCodeAt = do
   log "charCodeAt"
   assertEqual
     { actual: fromEnum <$> NESCU.charAt 0 (nes (Proxy :: Proxy "a"))
@@ -119,15 +160,19 @@ testNonEmptyStringCodeUnits = do
     { actual: fromEnum <$> NESCU.charAt 2 (nes (Proxy :: Proxy "ab"))
     , expected: Nothing
     }
+  -- pslua: a code unit is a byte; index 2 holds the first byte of the
+  -- UTF-8 encoding of '€' (0xE2), not the code point 0x20AC.
   assertEqual
     { actual: fromEnum <$> NESCU.charAt 2 (nes (Proxy :: Proxy "5 €"))
-    , expected: Just 0x20AC
+    , expected: Just 0xE2
     }
   assertEqual
     { actual: fromEnum <$> NESCU.charAt 10 (nes (Proxy :: Proxy "5 €"))
     , expected: Nothing
     }
 
+testToChar :: Effect Unit
+testToChar = do
   log "toChar"
   assertEqual
     { actual: NESCU.toChar (nes (Proxy :: Proxy "a"))
@@ -138,6 +183,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testToCharArray :: Effect Unit
+testToCharArray = do
   log "toCharArray"
   assertEqual
     { actual: NESCU.toCharArray (nes (Proxy :: Proxy "a"))
@@ -147,17 +194,24 @@ testNonEmptyStringCodeUnits = do
     { actual: NESCU.toCharArray (nes (Proxy :: Proxy "ab"))
     , expected: ['a', 'b']
     }
+  -- pslua: a Char is a byte, so the upstream "Hello☺\n" case (with a
+  -- multi-byte '☺' Char) is not expressible; an ASCII string keeps the
+  -- intent (letters plus a control character).
   assertEqual
-    { actual: NESCU.toCharArray (nes (Proxy :: Proxy "Hello☺\n"))
-    , expected: ['H','e','l','l','o','☺','\n']
+    { actual: NESCU.toCharArray (nes (Proxy :: Proxy "Hello!\n"))
+    , expected: ['H','e','l','l','o','!','\n']
     }
 
+testToNonEmptyCharArray :: Effect Unit
+testToNonEmptyCharArray = do
   log "toNonEmptyCharArray"
   assertEqual
     { actual: NESCU.toNonEmptyCharArray (nes (Proxy :: Proxy "ab"))
     , expected: nea ['a', 'b']
     }
 
+testUncons :: Effect Unit
+testUncons = do
   log "uncons"
   assertEqual
     { actual: NESCU.uncons (nes (Proxy :: Proxy "a"))
@@ -168,6 +222,8 @@ testNonEmptyStringCodeUnits = do
     , expected: { head: 'H', tail: Just (nes (Proxy :: Proxy "ello World")) }
     }
 
+testTakeWhile :: Effect Unit
+testTakeWhile = do
   log "takeWhile"
   assertEqual
     { actual: NESCU.takeWhile (\_ -> true) (nes (Proxy :: Proxy "abc"))
@@ -190,6 +246,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testDropWhile :: Effect Unit
+testDropWhile = do
   log "dropWhile"
   assertEqual
     { actual: NESCU.dropWhile (\_ -> true) (nes (Proxy :: Proxy "abc"))
@@ -208,6 +266,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Just (nes (Proxy :: Proxy ".purs"))
     }
 
+testIndexOf :: Effect Unit
+testIndexOf = do
   log "indexOf"
   assertEqual
     { actual: NESCU.indexOf (Pattern "") (nes (Proxy :: Proxy "abcd"))
@@ -222,6 +282,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testIndexOf' :: Effect Unit
+testIndexOf' = do
   log "indexOf'"
   assertEqual
     { actual: NESCU.indexOf' (Pattern "") (-1) (nes (Proxy :: Proxy "ab"))
@@ -260,6 +322,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testLastIndexOf :: Effect Unit
+testLastIndexOf = do
   log "lastIndexOf"
   assertEqual
     { actual: NESCU.lastIndexOf (Pattern "") (nes (Proxy :: Proxy "abcd"))
@@ -274,6 +338,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testLastIndexOf' :: Effect Unit
+testLastIndexOf' = do
   log "lastIndexOf'"
   assertEqual
     { actual: NESCU.lastIndexOf' (Pattern "") (-1) (nes (Proxy :: Proxy "ab"))
@@ -312,6 +378,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testLength :: Effect Unit
+testLength = do
   log "length"
   assertEqual
     { actual: NESCU.length (nes (Proxy :: Proxy "a"))
@@ -322,6 +390,8 @@ testNonEmptyStringCodeUnits = do
     , expected: 2
     }
 
+testTake :: Effect Unit
+testTake = do
   log "take"
   assertEqual
     { actual: NESCU.take 0 (nes (Proxy :: Proxy "ab"))
@@ -344,6 +414,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testTakeRight :: Effect Unit
+testTakeRight = do
   log "takeRight"
   assertEqual
     { actual: NESCU.takeRight 0 (nes (Proxy :: Proxy "ab"))
@@ -366,6 +438,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Nothing
     }
 
+testDrop :: Effect Unit
+testDrop = do
   log "drop"
   assertEqual
     { actual: NESCU.drop 0 (nes (Proxy :: Proxy "ab"))
@@ -388,6 +462,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Just (nes (Proxy :: Proxy "ab"))
     }
 
+testDropRight :: Effect Unit
+testDropRight = do
   log "dropRight"
   assertEqual
     { actual: NESCU.dropRight 0 (nes (Proxy :: Proxy "ab"))
@@ -410,6 +486,8 @@ testNonEmptyStringCodeUnits = do
     , expected: Just (nes (Proxy :: Proxy "ab"))
     }
 
+testCountPrefix :: Effect Unit
+testCountPrefix = do
   log "countPrefix"
   assertEqual
     { actual: NESCU.countPrefix (_ == 'a') (nes (Proxy :: Proxy "ab"))
@@ -428,6 +506,8 @@ testNonEmptyStringCodeUnits = do
     , expected: 0
     }
 
+testSplitAt :: Effect Unit
+testSplitAt = do
   log "splitAt"
   assertEqual
     { actual: NESCU.splitAt 0 (nes (Proxy :: Proxy "a"))
