@@ -1,3 +1,7 @@
+-- Pattern and Replacement are literal strings in PureScript, so the
+-- implementations below must not interpret them as Lua patterns:
+-- string.find is used with its `plain` flag and results are spliced
+-- together by hand.
 return {
   _localeCompare = (function(lt)
     return function(eq)
@@ -7,15 +11,54 @@ return {
     end
   end),
   replace = (function(pattern)
-    return function(replacement) return function(string) return string:gsub(pattern, replacement, 1) end end
+    return function(replacement)
+      return function(s)
+        if pattern == "" then return replacement .. s end
+        local a, b = s:find(pattern, 1, true)
+        if a == nil then return s end
+        return s:sub(1, a - 1) .. replacement .. s:sub(b + 1)
+      end
+    end
   end),
   replaceAll = (function(pattern)
-    return function(replacement) return function(string) return string:gsub(pattern, replacement) end end
+    return function(replacement)
+      return function(s)
+        if pattern == "" then
+          local out = { replacement }
+          for i = 1, #s do
+            out[#out + 1] = s:sub(i, i)
+            out[#out + 1] = replacement
+          end
+          return table.concat(out)
+        end
+        local out, i = {}, 1
+        while true do
+          local a, b = s:find(pattern, i, true)
+          if a == nil then break end
+          out[#out + 1] = s:sub(i, a - 1)
+          out[#out + 1] = replacement
+          i = b + 1
+        end
+        out[#out + 1] = s:sub(i)
+        return table.concat(out)
+      end
+    end
   end),
   split = (function(sep)
     return function(s)
       local t = {}
-      for str in s:gmatch("([^" .. sep .. "]+)") do table.insert(t, str) end
+      if sep == "" then
+        for i = 1, #s do t[i] = s:sub(i, i) end
+        return t
+      end
+      local i = 1
+      while true do
+        local a, b = s:find(sep, i, true)
+        if a == nil then break end
+        t[#t + 1] = s:sub(i, a - 1)
+        i = b + 1
+      end
+      t[#t + 1] = s:sub(i)
       return t
     end
   end),
