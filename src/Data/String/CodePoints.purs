@@ -188,18 +188,24 @@ codePointAtFallback n s = case uncons s of
 -- | Nothing
 -- | ```
 -- |
+-- In pslua strings are UTF-8 byte strings (a code unit is a byte), so the
+-- tail starts after the UTF-8 encoding of the head code point.
 uncons :: String -> Maybe { head :: CodePoint, tail :: String }
 uncons s = case CU.length s of
   0 -> Nothing
-  1 -> Just { head: CodePoint (fromEnum (Unsafe.charAt 0 s)), tail: "" }
   _ ->
     let
-      cu0 = fromEnum (Unsafe.charAt 0 s)
-      cu1 = fromEnum (Unsafe.charAt 1 s)
+      cp = unsafeCodePointAt0 s
     in
-      if isLead cu0 && isTrail cu1
-        then Just { head: unsurrogate cu0 cu1, tail: CU.drop 2 s }
-        else Just { head: CodePoint cu0, tail: CU.drop 1 s }
+      Just { head: cp, tail: CU.drop (utf8Width cp) s }
+
+-- | The number of bytes in the UTF-8 encoding of the given code point.
+utf8Width :: CodePoint -> Int
+utf8Width (CodePoint cp)
+  | cp < 0x80 = 1
+  | cp < 0x800 = 2
+  | cp < 0x10000 = 3
+  | otherwise = 4
 
 -- | Returns the number of code points in the string. Operates in constant
 -- | space and in time linear to the length of the string.
