@@ -14,7 +14,25 @@ import Type.Proxy (Proxy(..))
 
 testNonEmptyString :: Effect Unit
 testNonEmptyString = do
+  testFromString
+  testToString
+  testAppendString
+  testPrependString
+  testContains
+  testLocaleCompare
+  testReplace
+  testReplaceAll
+  testStripPrefix
+  testStripSuffix
+  testToLower
+  testToUpper
+  testTrim
+  testJoinWith
+  testJoin1With
+  testJoinWith1
 
+testFromString :: Effect Unit
+testFromString = do
   log "fromString"
   assertEqual
     { actual: NES.fromString ""
@@ -25,12 +43,16 @@ testNonEmptyString = do
     , expected: Just (nes (Proxy :: Proxy "hello"))
     }
 
+testToString :: Effect Unit
+testToString = do
   log "toString"
   assertEqual
     { actual: (NES.toString <$> NES.fromString "hello")
     , expected: Just "hello"
     }
 
+testAppendString :: Effect Unit
+testAppendString = do
   log "appendString"
   assertEqual
     { actual: NES.appendString (nes (Proxy :: Proxy "Hello")) " world"
@@ -41,6 +63,8 @@ testNonEmptyString = do
     , expected: nes (Proxy :: Proxy "Hello")
     }
 
+testPrependString :: Effect Unit
+testPrependString = do
   log "prependString"
   assertEqual
     { actual: NES.prependString "be" (nes (Proxy :: Proxy "fore"))
@@ -51,6 +75,8 @@ testNonEmptyString = do
     , expected: nes (Proxy :: Proxy "fore")
     }
 
+testContains :: Effect Unit
+testContains = do
   log "contains"
   assert $ NES.contains (Pattern "") (nes (Proxy :: Proxy "abcd"))
   assert $ NES.contains (Pattern "bc") (nes (Proxy :: Proxy "abcd"))
@@ -58,6 +84,8 @@ testNonEmptyString = do
   assert $ NES.contains (Pattern "needle") (nes (Proxy :: Proxy "haystack with needle"))
   assert $ not NES.contains (Pattern "needle") (nes (Proxy :: Proxy "haystack"))
 
+testLocaleCompare :: Effect Unit
+testLocaleCompare = do
   log "localeCompare"
   assertEqual
     { actual: NES.localeCompare (nes (Proxy :: Proxy "a")) (nes (Proxy :: Proxy "a"))
@@ -72,6 +100,8 @@ testNonEmptyString = do
     , expected: GT
     }
 
+testReplace :: Effect Unit
+testReplace = do
   log "replace"
   assertEqual
     { actual: NES.replace (Pattern "b") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "abc"))
@@ -86,6 +116,8 @@ testNonEmptyString = do
     , expected: nes (Proxy :: Proxy "abc")
     }
 
+testReplaceAll :: Effect Unit
+testReplaceAll = do
   log "replaceAll"
   assertEqual
     { actual: NES.replaceAll (Pattern "[b]") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "a[b]c"))
@@ -100,6 +132,8 @@ testNonEmptyString = do
     , expected: nes (Proxy :: Proxy "abc")
     }
 
+testStripPrefix :: Effect Unit
+testStripPrefix = do
   log "stripPrefix"
   assertEqual
     { actual: NES.stripPrefix (Pattern "") (nes (Proxy :: Proxy "abc"))
@@ -130,6 +164,8 @@ testNonEmptyString = do
     , expected: Nothing
     }
 
+testStripSuffix :: Effect Unit
+testStripSuffix = do
   log "stripSuffix"
   assertEqual
     { actual: NES.stripSuffix (Pattern ".exe") (nes (Proxy :: Proxy "purs.exe"))
@@ -144,18 +180,24 @@ testNonEmptyString = do
     , expected: Nothing
     }
 
+testToLower :: Effect Unit
+testToLower = do
   log "toLower"
   assertEqual
     { actual: NES.toLower (nes (Proxy :: Proxy "bAtMaN"))
     , expected: nes (Proxy :: Proxy "batman")
     }
 
+testToUpper :: Effect Unit
+testToUpper = do
   log "toUpper"
   assertEqual
     { actual: NES.toUpper (nes (Proxy :: Proxy "bAtMaN"))
     , expected: nes (Proxy :: Proxy "BATMAN")
     }
 
+testTrim :: Effect Unit
+testTrim = do
   log "trim"
   assertEqual
     { actual: NES.trim (nes (Proxy :: Proxy "  abc  "))
@@ -166,6 +208,8 @@ testNonEmptyString = do
     , expected: Nothing
     }
 
+testJoinWith :: Effect Unit
+testJoinWith = do
   log "joinWith"
   assertEqual
     { actual: NES.joinWith "" []
@@ -180,6 +224,8 @@ testNonEmptyString = do
     , expected: "a--b--c"
     }
 
+testJoin1With :: Effect Unit
+testJoin1With = do
   log "join1With"
   assertEqual
     { actual: NES.join1With "" (nea [nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b")])
@@ -198,6 +244,8 @@ testNonEmptyString = do
     , expected: nes (Proxy :: Proxy "applebanana")
     }
 
+testJoinWith1 :: Effect Unit
+testJoinWith1 = do
   log "joinWith1"
   assertEqual
     { actual: NES.joinWith1 (nes (Proxy :: Proxy " ")) (nea ["a", "b"])

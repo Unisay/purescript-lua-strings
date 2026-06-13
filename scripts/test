@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 echo "Testing..."
 
 spago build --config spago-test.dhall --quiet
 
-if  lua -e 'dofile("dist/test.lua").main()'; then
+if lua -e 'dofile("dist/test.lua").main()'; then
     echo "✅ Tests succeeded."
 else
     echo "❌ Tests failed."
+    exit 1
 fi

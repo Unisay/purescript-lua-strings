@@ -12,6 +12,32 @@ import Test.Assert (assert, assertEqual)
 
 testStringCodeUnits :: Effect Unit
 testStringCodeUnits = do
+  testStripPrefix
+  testStripSuffix
+  testCharAt
+  testSingleton
+  testCharCodeAt
+  testToChar
+  testUncons
+  testTakeWhile
+  testDropWhile
+  testFromCharArray
+  testIndexOf
+  testIndexOf'
+  testLastIndexOf
+  testLastIndexOf'
+  testLength
+  testTake
+  testTakeRight
+  testDrop
+  testDropRight
+  testCountPrefix
+  testSplitAt
+  testToCharArray
+  testSlice
+
+testStripPrefix :: Effect Unit
+testStripPrefix = do
   log "stripPrefix"
   assertEqual
     { actual: SCU.stripPrefix (Pattern "abc") "abcde"
@@ -38,6 +64,8 @@ testStringCodeUnits = do
     , expected: Just ""
     }
 
+testStripSuffix :: Effect Unit
+testStripSuffix = do
   log "stripSuffix"
   assertEqual
     { actual: SCU.stripSuffix (Pattern "cde") "abcde"
@@ -64,6 +92,8 @@ testStringCodeUnits = do
     , expected: Just ""
     }
 
+testCharAt :: Effect Unit
+testCharAt = do
   log "charAt"
   assertEqual
     { actual: SCU.charAt 0 ""
@@ -90,12 +120,16 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testSingleton :: Effect Unit
+testSingleton = do
   log "singleton"
   assertEqual
     { actual: SCU.singleton 'a'
     , expected: "a"
     }
 
+testCharCodeAt :: Effect Unit
+testCharCodeAt = do
   log "charCodeAt"
   assertEqual
     { actual: (fromEnum <$> SCU.charAt 0 "")
@@ -122,6 +156,8 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testToChar :: Effect Unit
+testToChar = do
   log "toChar"
   assertEqual
     { actual: SCU.toChar ""
@@ -136,6 +172,8 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testUncons :: Effect Unit
+testUncons = do
   log "uncons"
   assert $ isNothing (SCU.uncons "")
   assertEqual
@@ -147,6 +185,8 @@ testStringCodeUnits = do
     , expected: Just { head: 'a', tail: "b" }
     }
 
+testTakeWhile :: Effect Unit
+testTakeWhile = do
   log "takeWhile"
   assertEqual
     { actual: SCU.takeWhile (\c -> true) "abc"
@@ -161,6 +201,8 @@ testStringCodeUnits = do
     , expected: "aa"
     }
 
+testDropWhile :: Effect Unit
+testDropWhile = do
   log "dropWhile"
   assertEqual
     { actual: SCU.dropWhile (\c -> true) "abc"
@@ -175,6 +217,8 @@ testStringCodeUnits = do
     , expected: "bbcc"
     }
 
+testFromCharArray :: Effect Unit
+testFromCharArray = do
   log "fromCharArray"
   assertEqual
     { actual: SCU.fromCharArray []
@@ -185,6 +229,8 @@ testStringCodeUnits = do
     , expected: "ab"
     }
 
+testIndexOf :: Effect Unit
+testIndexOf = do
   log "indexOf"
   assertEqual
     { actual: SCU.indexOf (Pattern "") ""
@@ -203,6 +249,8 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testIndexOf' :: Effect Unit
+testIndexOf' = do
   log "indexOf'"
   assertEqual
     { actual: SCU.indexOf' (Pattern "") 0 ""
@@ -245,6 +293,8 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testLastIndexOf :: Effect Unit
+testLastIndexOf = do
   log "lastIndexOf"
   assertEqual
     { actual: SCU.lastIndexOf (Pattern "") ""
@@ -263,6 +313,8 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testLastIndexOf' :: Effect Unit
+testLastIndexOf' = do
   log "lastIndexOf'"
   assertEqual
     { actual: SCU.lastIndexOf' (Pattern "") 0 ""
@@ -305,6 +357,8 @@ testStringCodeUnits = do
     , expected: Nothing
     }
 
+testLength :: Effect Unit
+testLength = do
   log "length"
   assertEqual
     { actual: SCU.length ""
@@ -319,6 +373,8 @@ testStringCodeUnits = do
     , expected: 2
     }
 
+testTake :: Effect Unit
+testTake = do
   log "take"
   assertEqual
     { actual: SCU.take 0 "ab"
@@ -341,6 +397,8 @@ testStringCodeUnits = do
     , expected: ""
     }
 
+testTakeRight :: Effect Unit
+testTakeRight = do
   log "takeRight"
   assertEqual
     { actual: SCU.takeRight 0 "ab"
@@ -363,6 +421,8 @@ testStringCodeUnits = do
     , expected: ""
     }
 
+testDrop :: Effect Unit
+testDrop = do
   log "drop"
   assertEqual
     { actual: SCU.drop 0 "ab"
@@ -385,6 +445,8 @@ testStringCodeUnits = do
     , expected: "ab"
     }
 
+testDropRight :: Effect Unit
+testDropRight = do
   log "dropRight"
   assertEqual
     { actual: SCU.dropRight 0 "ab"
@@ -407,6 +469,8 @@ testStringCodeUnits = do
     , expected: "ab"
     }
 
+testCountPrefix :: Effect Unit
+testCountPrefix = do
   log "countPrefix"
   assertEqual
     { actual: SCU.countPrefix (_ == 'a') ""
@@ -425,6 +489,8 @@ testStringCodeUnits = do
     , expected: 1
     }
 
+testSplitAt :: Effect Unit
+testSplitAt = do
   log "splitAt"
   assertEqual
     { actual: SCU.splitAt 1 ""
@@ -455,6 +521,8 @@ testStringCodeUnits = do
     , expected: {before: "Hi", after: ""}
     }
 
+testToCharArray :: Effect Unit
+testToCharArray = do
   log "toCharArray"
   assertEqual
     { actual: SCU.toCharArray ""
@@ -469,6 +537,8 @@ testStringCodeUnits = do
     , expected: ['a', 'b']
     }
 
+testSlice :: Effect Unit
+testSlice = do
   log "slice"
   assertEqual
     { actual: SCU.slice 0 0   "purescript"

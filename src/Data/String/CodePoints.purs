@@ -188,18 +188,16 @@ codePointAtFallback n s = case uncons s of
 -- | Nothing
 -- | ```
 -- |
+-- In pslua strings are UTF-8 byte strings (a code unit is a byte). The tail
+-- must start exactly where the foreign decoder stopped reading the head, so
+-- it is taken as `drop 1` rather than recomputed from the head's value: a
+-- malformed leading byte decodes to itself and advances a single byte, and
+-- recomputing the width from that value would skip too far and desynchronise
+-- the rest of the string.
 uncons :: String -> Maybe { head :: CodePoint, tail :: String }
-uncons s = case CU.length s of
-  0 -> Nothing
-  1 -> Just { head: CodePoint (fromEnum (Unsafe.charAt 0 s)), tail: "" }
-  _ ->
-    let
-      cu0 = fromEnum (Unsafe.charAt 0 s)
-      cu1 = fromEnum (Unsafe.charAt 1 s)
-    in
-      if isLead cu0 && isTrail cu1
-        then Just { head: unsurrogate cu0 cu1, tail: CU.drop 2 s }
-        else Just { head: CodePoint cu0, tail: CU.drop 1 s }
+uncons s
+  | CU.length s == 0 = Nothing
+  | otherwise = Just { head: unsafeCodePointAt0 s, tail: drop 1 s }
 
 -- | Returns the number of code points in the string. Operates in constant
 -- | space and in time linear to the length of the string.
@@ -325,8 +323,12 @@ lastIndexOf' p i s =
 -- | "b �"
 -- | ```
 -- |
+-- Eta-expanded (rather than point-free `_take takeFallback`) so this binding
+-- is a function: uncons now reaches take via drop, and the resulting
+-- recursive group (uncons → drop → take → takeFallback → uncons) is only
+-- well-formed if every member is a function rather than a plain value.
 take :: Int -> String -> String
-take = _take takeFallback
+take n s = _take takeFallback n s
 
 foreign import _take :: (Int -> String -> String) -> Int -> String -> String
 
