@@ -323,8 +323,12 @@ lastIndexOf' p i s =
 -- | "b �"
 -- | ```
 -- |
+-- Eta-expanded (rather than point-free `_take takeFallback`) so this binding
+-- is a function: uncons now reaches take via drop, and the resulting
+-- recursive group (uncons → drop → take → takeFallback → uncons) is only
+-- well-formed if every member is a function rather than a plain value.
 take :: Int -> String -> String
-take = _take takeFallback
+take n s = _take takeFallback n s
 
 foreign import _take :: (Int -> String -> String) -> Int -> String -> String
 
