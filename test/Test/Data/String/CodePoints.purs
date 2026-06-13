@@ -20,6 +20,7 @@ import Prelude
 import Data.Enum (fromEnum, toEnum)
 import Data.Maybe (Maybe(..), fromJust)
 import Data.String.CodePoints as SCP
+import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Effect.Console (log)
@@ -35,6 +36,8 @@ testStringCodePoints = do
   testCodePointFromChar
   testSingleton
   testToFromCodePointArray
+  testBoundaries
+  testMalformed
   testCodePointAt
   testUncons
   testLength
@@ -138,6 +141,76 @@ testToFromCodePointArray = do
   assertEqual
     { actual: SCP.fromCodePointArray (SCP.toCodePointArray str)
     , expected: str
+    }
+
+-- Exercises the UTF-8 encoder/decoder at every width boundary. Each code
+-- point round-trips through fromCodePointArray (encode) and back through
+-- toCodePointArray (decode), and singleton agrees with a one-element array.
+testBoundaries :: Effect Unit
+testBoundaries = do
+  log "encode/decode boundaries"
+  let
+    -- 1-byte edges, 2-byte edges, 3-byte edges, 4-byte edges
+    codes = [ 0x0, 0x7F, 0x80, 0x7FF, 0x800, 0xFFFF, 0x10000, 0x10FFFF ]
+    cps = map cp codes
+    encoded = SCP.fromCodePointArray cps
+  assertEqual
+    { actual: map fromEnum (SCP.toCodePointArray encoded)
+    , expected: codes
+    }
+  assertEqual
+    { actual: SCP.length encoded
+    , expected: 8
+    }
+  -- byte widths: 1 + 1 + 2 + 2 + 3 + 3 + 4 + 4
+  assertEqual
+    { actual: SCU.length encoded
+    , expected: 20
+    }
+  assertEqual
+    { actual: map (\c -> SCU.length (SCP.singleton c)) cps
+    , expected: [ 1, 1, 2, 2, 3, 3, 4, 4 ]
+    }
+
+-- Malformed UTF-8 (a lone continuation byte, a truncated multi-byte lead)
+-- must decode one byte at a time without crashing or desynchronising the
+-- bytes that follow. The raw bytes are built with CodeUnits.singleton
+-- (a Char is one byte in pslua); a non-ASCII string literal would be
+-- re-encoded as valid UTF-8 by the compiler and could not express them.
+testMalformed :: Effect Unit
+testMalformed = do
+  log "malformed input"
+  let
+    loneCont = "a" <> byte 0x80 <> "b"
+    truncated2 = byte 0xC2
+    truncated3 = byte 0xE2 <> byte 0x82
+  -- lone continuation byte between ASCII anchors: 'b' must survive
+  assertEqual
+    { actual: map fromEnum (SCP.toCodePointArray loneCont)
+    , expected: [ 0x61, 0x80, 0x62 ]
+    }
+  assertEqual
+    { actual: SCP.length loneCont
+    , expected: 3
+    }
+  -- uncons of the lone byte must consume exactly one byte, leaving "b"
+  assertEqual
+    { actual: (_.tail) <$> SCP.uncons (byte 0x80 <> "b")
+    , expected: Just "b"
+    }
+  assertEqual
+    { actual: (fromEnum <<< _.head) <$> SCP.uncons (byte 0x80 <> "b")
+    , expected: Just 0x80
+    }
+  -- truncated two-byte lead (0xC2 with no continuation)
+  assertEqual
+    { actual: map fromEnum (SCP.toCodePointArray truncated2)
+    , expected: [ 0xC2 ]
+    }
+  -- truncated three-byte lead (first two bytes of the euro sign)
+  assertEqual
+    { actual: map fromEnum (SCP.toCodePointArray truncated3)
+    , expected: [ 0xE2, 0x82 ]
     }
 
 testCodePointAt :: Effect Unit
@@ -750,3 +823,9 @@ testSplitAt2 = do
 
 cp :: Int -> SCP.CodePoint
 cp = unsafePartial fromJust <<< toEnum
+
+-- A single raw byte as a String. `toEnum n :: Maybe Char` is the byte with
+-- code n (a Char is one byte in pslua), so CodeUnits.singleton wraps it
+-- without any UTF-8 re-encoding.
+byte :: Int -> String
+byte n = SCU.singleton (unsafePartial fromJust (toEnum n))

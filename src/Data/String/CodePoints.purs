@@ -188,24 +188,16 @@ codePointAtFallback n s = case uncons s of
 -- | Nothing
 -- | ```
 -- |
--- In pslua strings are UTF-8 byte strings (a code unit is a byte), so the
--- tail starts after the UTF-8 encoding of the head code point.
+-- In pslua strings are UTF-8 byte strings (a code unit is a byte). The tail
+-- must start exactly where the foreign decoder stopped reading the head, so
+-- it is taken as `drop 1` rather than recomputed from the head's value: a
+-- malformed leading byte decodes to itself and advances a single byte, and
+-- recomputing the width from that value would skip too far and desynchronise
+-- the rest of the string.
 uncons :: String -> Maybe { head :: CodePoint, tail :: String }
-uncons s = case CU.length s of
-  0 -> Nothing
-  _ ->
-    let
-      cp = unsafeCodePointAt0 s
-    in
-      Just { head: cp, tail: CU.drop (utf8Width cp) s }
-
--- | The number of bytes in the UTF-8 encoding of the given code point.
-utf8Width :: CodePoint -> Int
-utf8Width (CodePoint cp)
-  | cp < 0x80 = 1
-  | cp < 0x800 = 2
-  | cp < 0x10000 = 3
-  | otherwise = 4
+uncons s
+  | CU.length s == 0 = Nothing
+  | otherwise = Just { head: unsafeCodePointAt0 s, tail: drop 1 s }
 
 -- | Returns the number of code points in the string. Operates in constant
 -- | space and in time linear to the length of the string.
