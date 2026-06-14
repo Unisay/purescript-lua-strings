@@ -17,6 +17,7 @@ testCaseInsensitiveString = do
 
   log "comparison"
   assertEqual
-    { actual: compare (CaseInsensitiveString "qwerty") (CaseInsensitiveString "QWERTY")
+    { actual: compare (CaseInsensitiveString "qwerty")
+        (CaseInsensitiveString "QWERTY")
     , expected: EQ
     }

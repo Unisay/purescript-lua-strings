@@ -5,9 +5,8 @@
 return {
   _localeCompare = (function(lt)
     return function(eq)
-      return function(gt)
-        return function(s1) return function(s2) return (s1 < s2) and lt or (s2 < s1) and gt or eq end end
-      end
+      return
+        function(gt) return function(s1) return function(s2) return (s1 < s2) and lt or (s2 < s1) and gt or eq end end end
     end
   end),
   replace = (function(pattern)
@@ -24,7 +23,7 @@ return {
     return function(replacement)
       return function(s)
         if pattern == "" then
-          local out = { replacement }
+          local out = {replacement}
           for i = 1, #s do
             out[#out + 1] = s:sub(i, i)
             out[#out + 1] = replacement
