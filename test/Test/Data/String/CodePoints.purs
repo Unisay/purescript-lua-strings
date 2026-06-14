@@ -12,7 +12,7 @@
 --
 -- The single upstream do-block is also split into per-section functions:
 -- one huge do-block generates Lua nested beyond the parser limit of stock
--- Lua 5.1 interpreters (Unisay/purescript-lua#46).
+-- Lua 5.1 interpreters (purescript-lua/purescript-lua#46).
 module Test.Data.String.CodePoints (testStringCodePoints) where
 
 import Prelude
