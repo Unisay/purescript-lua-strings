@@ -4,7 +4,6 @@
 -- under this representation; every export ignores them.
 --
 -- Lua 5.1: no utf8 library, no bit operators - plain arithmetic only.
-
 -- Decodes the code point starting at byte position i.
 -- Returns the code point and the position of the next one.
 -- An invalid leading byte is returned as-is (one byte consumed).
@@ -13,22 +12,16 @@ local function decode(s, i)
   if b1 < 0x80 then return b1, i + 1 end
   if b1 >= 0xC2 and b1 <= 0xDF then
     local b2 = s:byte(i + 1)
-    if b2 and b2 >= 0x80 and b2 <= 0xBF then
-      return (b1 - 0xC0) * 0x40 + (b2 - 0x80), i + 2
-    end
+    if b2 and b2 >= 0x80 and b2 <= 0xBF then return (b1 - 0xC0) * 0x40 + (b2 - 0x80), i + 2 end
   elseif b1 >= 0xE0 and b1 <= 0xEF then
     local b2, b3 = s:byte(i + 1, i + 2)
-    if b2 and b2 >= 0x80 and b2 <= 0xBF
-      and b3 and b3 >= 0x80 and b3 <= 0xBF then
+    if b2 and b2 >= 0x80 and b2 <= 0xBF and b3 and b3 >= 0x80 and b3 <= 0xBF then
       return (b1 - 0xE0) * 0x1000 + (b2 - 0x80) * 0x40 + (b3 - 0x80), i + 3
     end
   elseif b1 >= 0xF0 and b1 <= 0xF4 then
     local b2, b3, b4 = s:byte(i + 1, i + 3)
-    if b2 and b2 >= 0x80 and b2 <= 0xBF
-      and b3 and b3 >= 0x80 and b3 <= 0xBF
-      and b4 and b4 >= 0x80 and b4 <= 0xBF then
-      return (b1 - 0xF0) * 0x40000 + (b2 - 0x80) * 0x1000
-        + (b3 - 0x80) * 0x40 + (b4 - 0x80), i + 4
+    if b2 and b2 >= 0x80 and b2 <= 0xBF and b3 and b3 >= 0x80 and b3 <= 0xBF and b4 and b4 >= 0x80 and b4 <= 0xBF then
+      return (b1 - 0xF0) * 0x40000 + (b2 - 0x80) * 0x1000 + (b3 - 0x80) * 0x40 + (b4 - 0x80), i + 4
     end
   end
   return b1, i + 1
@@ -37,28 +30,16 @@ end
 -- Encodes a code point as a UTF-8 byte string.
 local function encode(cp)
   if cp < 0x80 then return string.char(cp) end
-  if cp < 0x800 then
-    return string.char(0xC0 + math.floor(cp / 0x40), 0x80 + cp % 0x40)
-  end
+  if cp < 0x800 then return string.char(0xC0 + math.floor(cp / 0x40), 0x80 + cp % 0x40) end
   if cp < 0x10000 then
-    return string.char(
-      0xE0 + math.floor(cp / 0x1000),
-      0x80 + math.floor(cp / 0x40) % 0x40,
-      0x80 + cp % 0x40
-    )
+    return string.char(0xE0 + math.floor(cp / 0x1000), 0x80 + math.floor(cp / 0x40) % 0x40, 0x80 + cp % 0x40)
   end
-  return string.char(
-    0xF0 + math.floor(cp / 0x40000),
-    0x80 + math.floor(cp / 0x1000) % 0x40,
-    0x80 + math.floor(cp / 0x40) % 0x40,
-    0x80 + cp % 0x40
-  )
+  return string.char(0xF0 + math.floor(cp / 0x40000), 0x80 + math.floor(cp / 0x1000) % 0x40,
+                     0x80 + math.floor(cp / 0x40) % 0x40, 0x80 + cp % 0x40)
 end
 
 return {
-  _singleton = (function(_)
-    return function(cp) return encode(cp) end
-  end),
+  _singleton = (function(_) return function(cp) return encode(cp) end end),
   _fromCodePointArray = (function(_)
     return function(cps)
       local t = {}
@@ -136,5 +117,5 @@ return {
       local cp = decode(s, 1)
       return cp
     end
-  end),
+  end)
 }

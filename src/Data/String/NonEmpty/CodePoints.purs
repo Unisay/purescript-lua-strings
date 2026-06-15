@@ -55,7 +55,8 @@ fromCodePointArray = case _ of
   cs -> Just (toNonEmptyString (CP.fromCodePointArray cs))
 
 fromNonEmptyCodePointArray :: NonEmptyArray CodePoint -> NonEmptyString
-fromNonEmptyCodePointArray = unsafePartial fromJust <<< fromCodePointArray <<< NEA.toArray
+fromNonEmptyCodePointArray = unsafePartial fromJust <<< fromCodePointArray <<<
+  NEA.toArray
 
 singleton :: CodePoint -> NonEmptyString
 singleton = toNonEmptyString <<< CP.singleton
@@ -73,7 +74,8 @@ toCodePointArray :: NonEmptyString -> Array CodePoint
 toCodePointArray = CP.toCodePointArray <<< fromNonEmptyString
 
 toNonEmptyCodePointArray :: NonEmptyString -> NonEmptyArray CodePoint
-toNonEmptyCodePointArray = unsafePartial fromJust <<< NEA.fromArray <<< toCodePointArray
+toNonEmptyCodePointArray = unsafePartial fromJust <<< NEA.fromArray <<<
+  toCodePointArray
 
 codePointAt :: Int -> NonEmptyString -> Maybe CodePoint
 codePointAt = liftS <<< CP.codePointAt
@@ -107,9 +109,8 @@ take i nes =
   let
     s = fromNonEmptyString nes
   in
-    if i < 1
-      then Nothing
-      else Just (toNonEmptyString (CP.take i s))
+    if i < 1 then Nothing
+    else Just (toNonEmptyString (CP.take i s))
 
 takeWhile :: (CodePoint -> Boolean) -> NonEmptyString -> Maybe NonEmptyString
 takeWhile f = fromString <<< liftS (CP.takeWhile f)
@@ -119,9 +120,8 @@ drop i nes =
   let
     s = fromNonEmptyString nes
   in
-    if i >= CP.length s
-      then Nothing
-      else Just (toNonEmptyString (CP.drop i s))
+    if i >= CP.length s then Nothing
+    else Just (toNonEmptyString (CP.drop i s))
 
 dropWhile :: (CodePoint -> Boolean) -> NonEmptyString -> Maybe NonEmptyString
 dropWhile f = fromString <<< liftS (CP.dropWhile f)

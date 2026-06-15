@@ -50,7 +50,8 @@ derive instance eqCodePoint :: Eq CodePoint
 derive instance ordCodePoint :: Ord CodePoint
 
 instance showCodePoint :: Show CodePoint where
-  show (CodePoint i) = "(CodePoint 0x" <> toUpper (toStringAs hexadecimal i) <> ")"
+  show (CodePoint i) = "(CodePoint 0x" <> toUpper (toStringAs hexadecimal i) <>
+    ")"
 
 instance boundedCodePoint :: Bounded CodePoint where
   bottom = CodePoint 0
@@ -96,9 +97,13 @@ foreign import _singleton
 singletonFallback :: CodePoint -> String
 singletonFallback (CodePoint cp) | cp <= 0xFFFF = fromCharCode cp
 singletonFallback (CodePoint cp) =
-  let lead = ((cp - 0x10000) / 0x400) + 0xD800 in
-  let trail = (cp - 0x10000) `mod` 0x400 + 0xDC00 in
-  fromCharCode lead <> fromCharCode trail
+  let
+    lead = ((cp - 0x10000) / 0x400) + 0xD800
+  in
+    let
+      trail = (cp - 0x10000) `mod` 0x400 + 0xDC00
+    in
+      fromCharCode lead <> fromCharCode trail
 
 -- | Creates a string from an array of code points. Operates in space and time
 -- | linear to the length of the array.
@@ -161,7 +166,10 @@ codePointAt :: Int -> String -> Maybe CodePoint
 codePointAt n _ | n < 0 = Nothing
 codePointAt 0 "" = Nothing
 codePointAt 0 s = Just (unsafeCodePointAt0 s)
-codePointAt n s = _codePointAt codePointAtFallback Just Nothing unsafeCodePointAt0 n s
+codePointAt n s = _codePointAt codePointAtFallback Just Nothing
+  unsafeCodePointAt0
+  n
+  s
 
 foreign import _codePointAt
   :: (Int -> String -> Maybe CodePoint)
@@ -174,7 +182,8 @@ foreign import _codePointAt
 
 codePointAtFallback :: Int -> String -> Maybe CodePoint
 codePointAtFallback n s = case uncons s of
-  Just { head, tail } -> if n == 0 then Just head else codePointAtFallback (n - 1) tail
+  Just { head, tail } ->
+    if n == 0 then Just head else codePointAtFallback (n - 1) tail
   _ -> Nothing
 
 -- | Returns a record with the first code point and the remaining code points
@@ -266,8 +275,10 @@ indexOf p s = (\i -> length (CU.take i s)) <$> CU.indexOf p s
 -- |
 indexOf' :: Pattern -> Int -> String -> Maybe Int
 indexOf' p i s =
-  let s' = drop i s in
-  (\k -> i + length (CU.take k s')) <$> CU.indexOf p s'
+  let
+    s' = drop i s
+  in
+    (\k -> i + length (CU.take k s')) <$> CU.indexOf p s'
 
 -- | Returns the number of code points preceding the last match of the given
 -- | pattern in the string. Returns `Nothing` when no matches are found.
@@ -307,8 +318,10 @@ lastIndexOf p s = (\i -> length (CU.take i s)) <$> CU.lastIndexOf p s
 -- |
 lastIndexOf' :: Pattern -> Int -> String -> Maybe Int
 lastIndexOf' p i s =
-  let i' = CU.length (take i s) in
-  (\k -> length (CU.take k s)) <$> CU.lastIndexOf' p i' s
+  let
+    i' = CU.length (take i s)
+  in
+    (\k -> length (CU.take k s)) <$> CU.lastIndexOf' p i' s
 
 -- | Returns a string containing the given number of code points from the
 -- | beginning of the given string. If the string does not have that many code
@@ -398,14 +411,17 @@ dropWhile p s = drop (countPrefix p s) s
 -- | ```
 splitAt :: Int -> String -> { before :: String, after :: String }
 splitAt i s =
-  let before = take i s in
-  { before
-  -- inline drop i s to reuse the result of take i s
-  , after: CU.drop (CU.length before) s
-  }
+  let
+    before = take i s
+  in
+    { before
+    -- inline drop i s to reuse the result of take i s
+    , after: CU.drop (CU.length before) s
+    }
 
 unsurrogate :: Int -> Int -> CodePoint
-unsurrogate lead trail = CodePoint ((lead - 0xD800) * 0x400 + (trail - 0xDC00) + 0x10000)
+unsurrogate lead trail = CodePoint
+  ((lead - 0xD800) * 0x400 + (trail - 0xDC00) + 0x10000)
 
 isLead :: Int -> Boolean
 isLead cu = 0xD800 <= cu && cu <= 0xDBFF
@@ -430,9 +446,10 @@ unsafeCodePointAt0Fallback s =
   let
     cu0 = fromEnum (Unsafe.charAt 0 s)
   in
-    if isLead cu0 && CU.length s > 1
-       then
-         let cu1 = fromEnum (Unsafe.charAt 1 s) in
-         if isTrail cu1 then unsurrogate cu0 cu1 else CodePoint cu0
-       else
-         CodePoint cu0
+    if isLead cu0 && CU.length s > 1 then
+      let
+        cu1 = fromEnum (Unsafe.charAt 1 s)
+      in
+        if isTrail cu1 then unsurrogate cu0 cu1 else CodePoint cu0
+    else
+      CodePoint cu0

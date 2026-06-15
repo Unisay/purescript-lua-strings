@@ -44,7 +44,9 @@ instance showNonEmptyString :: Show NonEmptyString where
 class MakeNonEmpty (s :: Symbol) where
   nes :: Proxy s -> NonEmptyString
 
-instance makeNonEmptyBad :: TE.Fail (TE.Text "Cannot create an NonEmptyString from an empty Symbol") => MakeNonEmpty "" where
+instance makeNonEmptyBad ::
+  TE.Fail (TE.Text "Cannot create an NonEmptyString from an empty Symbol") =>
+  MakeNonEmpty "" where
   nes _ = NonEmptyString ""
 
 else instance nonEmptyNonEmpty :: IsSymbol s => MakeNonEmpty s where
@@ -55,7 +57,8 @@ newtype NonEmptyReplacement = NonEmptyReplacement NonEmptyString
 
 derive newtype instance eqNonEmptyReplacement :: Eq NonEmptyReplacement
 derive newtype instance ordNonEmptyReplacement :: Ord NonEmptyReplacement
-derive newtype instance semigroupNonEmptyReplacement ∷ Semigroup NonEmptyReplacement
+derive newtype instance semigroupNonEmptyReplacement ∷
+  Semigroup NonEmptyReplacement
 
 instance showNonEmptyReplacement :: Show NonEmptyReplacement where
   show (NonEmptyReplacement s) = "(NonEmptyReplacement " <> show s <> ")"
@@ -201,8 +204,8 @@ trim (NonEmptyString s) = fromString (String.trim s)
 joinWith :: forall f. Foldable f => String -> f NonEmptyString -> String
 joinWith splice = F.intercalate splice <<< coe
   where
-    coe :: f NonEmptyString -> f String
-    coe = unsafeCoerce
+  coe :: f NonEmptyString -> f String
+  coe = unsafeCoerce
 
 -- | Joins non-empty strings in a non-empty container together as a new
 -- | non-empty string, inserting a possibly empty string as separator between
@@ -213,7 +216,8 @@ joinWith splice = F.intercalate splice <<< coe
 -- | join1With ", " [NonEmptyString "apple", NonEmptyString "banana"] == NonEmptyString "apple, banana"
 -- | join1With "" [NonEmptyString "apple", NonEmptyString "banana"] == NonEmptyString "applebanana"
 -- | ```
-join1With :: forall f. Foldable1 f => String -> f NonEmptyString -> NonEmptyString
+join1With
+  :: forall f. Foldable1 f => String -> f NonEmptyString -> NonEmptyString
 join1With splice = NonEmptyString <<< joinWith splice
 
 -- | Joins possibly empty strings in a non-empty container together as a new
@@ -225,7 +229,8 @@ join1With splice = NonEmptyString <<< joinWith splice
 -- | joinWith1 (NonEmptyString ", ") ["apple", "banana"] == NonEmptyString "apple, banana"
 -- | joinWith1 (NonEmptyString "/") ["a", "b", "", "c", ""] == NonEmptyString "a/b//c/"
 -- | ```
-joinWith1 :: forall f. Foldable1 f => NonEmptyString -> f String -> NonEmptyString
+joinWith1
+  :: forall f. Foldable1 f => NonEmptyString -> f String -> NonEmptyString
 joinWith1 (NonEmptyString splice) = NonEmptyString <<< F.intercalate splice
 
 liftS :: forall r. (String -> r) -> NonEmptyString -> r

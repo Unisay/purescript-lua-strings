@@ -81,22 +81,26 @@ testContains = do
   assert $ NES.contains (Pattern "") (nes (Proxy :: Proxy "abcd"))
   assert $ NES.contains (Pattern "bc") (nes (Proxy :: Proxy "abcd"))
   assert $ not NES.contains (Pattern "cb") (nes (Proxy :: Proxy "abcd"))
-  assert $ NES.contains (Pattern "needle") (nes (Proxy :: Proxy "haystack with needle"))
+  assert $ NES.contains (Pattern "needle")
+    (nes (Proxy :: Proxy "haystack with needle"))
   assert $ not NES.contains (Pattern "needle") (nes (Proxy :: Proxy "haystack"))
 
 testLocaleCompare :: Effect Unit
 testLocaleCompare = do
   log "localeCompare"
   assertEqual
-    { actual: NES.localeCompare (nes (Proxy :: Proxy "a")) (nes (Proxy :: Proxy "a"))
+    { actual: NES.localeCompare (nes (Proxy :: Proxy "a"))
+        (nes (Proxy :: Proxy "a"))
     , expected: EQ
     }
   assertEqual
-    { actual: NES.localeCompare (nes (Proxy :: Proxy "a")) (nes (Proxy :: Proxy "b"))
+    { actual: NES.localeCompare (nes (Proxy :: Proxy "a"))
+        (nes (Proxy :: Proxy "b"))
     , expected: LT
     }
   assertEqual
-    { actual: NES.localeCompare (nes (Proxy :: Proxy "b")) (nes (Proxy :: Proxy "a"))
+    { actual: NES.localeCompare (nes (Proxy :: Proxy "b"))
+        (nes (Proxy :: Proxy "a"))
     , expected: GT
     }
 
@@ -104,15 +108,21 @@ testReplace :: Effect Unit
 testReplace = do
   log "replace"
   assertEqual
-    { actual: NES.replace (Pattern "b") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "abc"))
+    { actual: NES.replace (Pattern "b")
+        (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!")))
+        (nes (Proxy :: Proxy "abc"))
     , expected: nes (Proxy :: Proxy "a!c")
     }
   assertEqual
-    { actual: NES.replace (Pattern "b") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "abbc"))
+    { actual: NES.replace (Pattern "b")
+        (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!")))
+        (nes (Proxy :: Proxy "abbc"))
     , expected: nes (Proxy :: Proxy "a!bc")
     }
   assertEqual
-    { actual: NES.replace (Pattern "d") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "abc"))
+    { actual: NES.replace (Pattern "d")
+        (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!")))
+        (nes (Proxy :: Proxy "abc"))
     , expected: nes (Proxy :: Proxy "abc")
     }
 
@@ -120,15 +130,21 @@ testReplaceAll :: Effect Unit
 testReplaceAll = do
   log "replaceAll"
   assertEqual
-    { actual: NES.replaceAll (Pattern "[b]") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "a[b]c"))
+    { actual: NES.replaceAll (Pattern "[b]")
+        (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!")))
+        (nes (Proxy :: Proxy "a[b]c"))
     , expected: nes (Proxy :: Proxy "a!c")
     }
   assertEqual
-    { actual: NES.replaceAll (Pattern "[b]") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "a[b]c[b]"))
+    { actual: NES.replaceAll (Pattern "[b]")
+        (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!")))
+        (nes (Proxy :: Proxy "a[b]c[b]"))
     , expected: nes (Proxy :: Proxy "a!c!")
     }
   assertEqual
-    { actual: NES.replaceAll (Pattern "x") (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!"))) (nes (Proxy :: Proxy "abc"))
+    { actual: NES.replaceAll (Pattern "x")
+        (NES.NonEmptyReplacement (nes (Proxy :: Proxy "!")))
+        (nes (Proxy :: Proxy "abc"))
     , expected: nes (Proxy :: Proxy "abc")
     }
 
@@ -152,11 +168,13 @@ testStripPrefix = do
     , expected: Nothing
     }
   assertEqual
-    { actual: NES.stripPrefix (Pattern "http:") (nes (Proxy :: Proxy "http://purescript.org"))
+    { actual: NES.stripPrefix (Pattern "http:")
+        (nes (Proxy :: Proxy "http://purescript.org"))
     , expected: Just (nes (Proxy :: Proxy "//purescript.org"))
     }
   assertEqual
-    { actual: NES.stripPrefix (Pattern "http:") (nes (Proxy :: Proxy "https://purescript.org"))
+    { actual: NES.stripPrefix (Pattern "http:")
+        (nes (Proxy :: Proxy "https://purescript.org"))
     , expected: Nothing
     }
   assertEqual
@@ -216,11 +234,16 @@ testJoinWith = do
     , expected: ""
     }
   assertEqual
-    { actual: NES.joinWith "" [nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b")]
+    { actual: NES.joinWith ""
+        [ nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b") ]
     , expected: "ab"
     }
   assertEqual
-    { actual: NES.joinWith "--" [nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b"), nes (Proxy :: Proxy "c")]
+    { actual: NES.joinWith "--"
+        [ nes (Proxy :: Proxy "a")
+        , nes (Proxy :: Proxy "b")
+        , nes (Proxy :: Proxy "c")
+        ]
     , expected: "a--b--c"
     }
 
@@ -228,19 +251,28 @@ testJoin1With :: Effect Unit
 testJoin1With = do
   log "join1With"
   assertEqual
-    { actual: NES.join1With "" (nea [nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b")])
+    { actual: NES.join1With ""
+        (nea [ nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b") ])
     , expected: nes (Proxy :: Proxy "ab")
     }
   assertEqual
-    { actual: NES.join1With "--" (nea [nes (Proxy :: Proxy "a"), nes (Proxy :: Proxy "b"), nes (Proxy :: Proxy "c")])
+    { actual: NES.join1With "--"
+        ( nea
+            [ nes (Proxy :: Proxy "a")
+            , nes (Proxy :: Proxy "b")
+            , nes (Proxy :: Proxy "c")
+            ]
+        )
     , expected: nes (Proxy :: Proxy "a--b--c")
     }
   assertEqual
-    { actual: NES.join1With ", " (nea [nes (Proxy :: Proxy "apple"), nes (Proxy :: Proxy "banana")])
+    { actual: NES.join1With ", "
+        (nea [ nes (Proxy :: Proxy "apple"), nes (Proxy :: Proxy "banana") ])
     , expected: nes (Proxy :: Proxy "apple, banana")
     }
   assertEqual
-    { actual: NES.join1With "" (nea [nes (Proxy :: Proxy "apple"), nes (Proxy :: Proxy "banana")])
+    { actual: NES.join1With ""
+        (nea [ nes (Proxy :: Proxy "apple"), nes (Proxy :: Proxy "banana") ])
     , expected: nes (Proxy :: Proxy "applebanana")
     }
 
@@ -248,19 +280,21 @@ testJoinWith1 :: Effect Unit
 testJoinWith1 = do
   log "joinWith1"
   assertEqual
-    { actual: NES.joinWith1 (nes (Proxy :: Proxy " ")) (nea ["a", "b"])
+    { actual: NES.joinWith1 (nes (Proxy :: Proxy " ")) (nea [ "a", "b" ])
     , expected: nes (Proxy :: Proxy "a b")
     }
   assertEqual
-    { actual: NES.joinWith1 (nes (Proxy :: Proxy "--")) (nea ["a", "b", "c"])
+    { actual: NES.joinWith1 (nes (Proxy :: Proxy "--")) (nea [ "a", "b", "c" ])
     , expected: nes (Proxy :: Proxy "a--b--c")
     }
   assertEqual
-    { actual: NES.joinWith1 (nes (Proxy :: Proxy ", ")) (nea ["apple", "banana"])
+    { actual: NES.joinWith1 (nes (Proxy :: Proxy ", "))
+        (nea [ "apple", "banana" ])
     , expected: nes (Proxy :: Proxy "apple, banana")
     }
   assertEqual
-    { actual: NES.joinWith1 (nes (Proxy :: Proxy "/")) (nea ["a", "b", "", "c", ""])
+    { actual: NES.joinWith1 (nes (Proxy :: Proxy "/"))
+        (nea [ "a", "b", "", "c", "" ])
     , expected: nes (Proxy :: Proxy "a/b//c/")
     }
 

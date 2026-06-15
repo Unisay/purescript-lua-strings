@@ -45,8 +45,10 @@ import Data.String.Unsafe as U
 -- | ```
 stripPrefix :: Pattern -> String -> Maybe String
 stripPrefix (Pattern prefix) str =
-  let { before, after } = splitAt (length prefix) str in
-  if before == prefix then Just after else Nothing
+  let
+    { before, after } = splitAt (length prefix) str
+  in
+    if before == prefix then Just after else Nothing
 
 -- | If the string ends with the given suffix, return the portion of the
 -- | string left after removing it, as a `Just` value. Otherwise, return
@@ -58,8 +60,10 @@ stripPrefix (Pattern prefix) str =
 -- | ```
 stripSuffix :: Pattern -> String -> Maybe String
 stripSuffix (Pattern suffix) str =
-  let { before, after } = splitAt (length str - length suffix) str in
-  if after == suffix then Just before else Nothing
+  let
+    { before, after } = splitAt (length str - length suffix) str
+  in
+    if after == suffix then Just before else Nothing
 
 -- | Checks whether the pattern appears in the given string.
 -- |
@@ -139,7 +143,7 @@ foreign import _toChar
 -- |
 uncons :: String -> Maybe { head :: Char, tail :: String }
 uncons "" = Nothing
-uncons s  = Just { head: U.charAt zero s, tail: drop one s }
+uncons s = Just { head: U.charAt zero s, tail: drop one s }
 
 -- | Returns the number of characters the string is composed of.
 -- |

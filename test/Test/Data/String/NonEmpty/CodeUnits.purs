@@ -49,7 +49,7 @@ testFromCharArray = do
     , expected: Nothing
     }
   assertEqual
-    { actual: NESCU.fromCharArray ['a', 'b']
+    { actual: NESCU.fromCharArray [ 'a', 'b' ]
     , expected: Just (nes (Proxy :: Proxy "ab"))
     }
 
@@ -97,11 +97,11 @@ testFromFoldable1 :: Effect Unit
 testFromFoldable1 = do
   log "fromFoldable1"
   assertEqual
-    { actual: NESCU.fromFoldable1 (nea ['a'])
+    { actual: NESCU.fromFoldable1 (nea [ 'a' ])
     , expected: nes (Proxy :: Proxy "a")
     }
   assertEqual
-    { actual: NESCU.fromFoldable1 (nea ['a', 'b', 'c'])
+    { actual: NESCU.fromFoldable1 (nea [ 'a', 'b', 'c' ])
     , expected: nes (Proxy :: Proxy "abc")
     }
 
@@ -188,18 +188,18 @@ testToCharArray = do
   log "toCharArray"
   assertEqual
     { actual: NESCU.toCharArray (nes (Proxy :: Proxy "a"))
-    , expected: ['a']
+    , expected: [ 'a' ]
     }
   assertEqual
     { actual: NESCU.toCharArray (nes (Proxy :: Proxy "ab"))
-    , expected: ['a', 'b']
+    , expected: [ 'a', 'b' ]
     }
   -- pslua: a Char is a byte, so the upstream "Hello☺\n" case (with a
   -- multi-byte '☺' Char) is not expressible; an ASCII string keeps the
   -- intent (letters plus a control character).
   assertEqual
     { actual: NESCU.toCharArray (nes (Proxy :: Proxy "Hello!\n"))
-    , expected: ['H','e','l','l','o','!','\n']
+    , expected: [ 'H', 'e', 'l', 'l', 'o', '!', '\n' ]
     }
 
 testToNonEmptyCharArray :: Effect Unit
@@ -207,7 +207,7 @@ testToNonEmptyCharArray = do
   log "toNonEmptyCharArray"
   assertEqual
     { actual: NESCU.toNonEmptyCharArray (nes (Proxy :: Proxy "ab"))
-    , expected: nea ['a', 'b']
+    , expected: nea [ 'a', 'b' ]
     }
 
 testUncons :: Effect Unit
@@ -238,7 +238,8 @@ testTakeWhile = do
     , expected: Just (nes (Proxy :: Proxy "aa"))
     }
   assertEqual
-    { actual: NESCU.takeWhile (_ /= ':') (nes (Proxy :: Proxy "http://purescript.org"))
+    { actual: NESCU.takeWhile (_ /= ':')
+        (nes (Proxy :: Proxy "http://purescript.org"))
     , expected: Just (nes (Proxy :: Proxy "http"))
     }
   assertEqual
@@ -515,11 +516,17 @@ testSplitAt = do
     }
   assertEqual
     { actual: NESCU.splitAt 1 (nes (Proxy :: Proxy "ab"))
-    , expected: { before: Just (nes (Proxy :: Proxy "a")), after: Just (nes (Proxy :: Proxy "b")) }
+    , expected:
+        { before: Just (nes (Proxy :: Proxy "a"))
+        , after: Just (nes (Proxy :: Proxy "b"))
+        }
     }
   assertEqual
     { actual: NESCU.splitAt 3 (nes (Proxy :: Proxy "aabcc"))
-    , expected: { before: Just (nes (Proxy :: Proxy "aab")), after: Just (nes (Proxy :: Proxy "cc")) }
+    , expected:
+        { before: Just (nes (Proxy :: Proxy "aab"))
+        , after: Just (nes (Proxy :: Proxy "cc"))
+        }
     }
   assertEqual
     { actual: NESCU.splitAt (-1) (nes (Proxy :: Proxy "abc"))
