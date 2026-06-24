@@ -22,7 +22,11 @@
           ]
         },
         "test": {
-          "dependencies": []
+          "dependencies": [
+            "assert",
+            "console",
+            "effect"
+          ]
         }
       }
     },
@@ -875,6 +879,16 @@
         "unsafe-coerce"
       ]
     },
+    "assert": {
+      "type": "git",
+      "url": "https://github.com/purescript-lua/purescript-lua-assert.git",
+      "rev": "76e9059ee1d1ba38f6b03795e8cf1e4ffc566c3d",
+      "dependencies": [
+        "console",
+        "effect",
+        "prelude"
+      ]
+    },
     "bifunctors": {
       "type": "registry",
       "version": "6.1.0",
@@ -885,6 +899,15 @@
         "newtype",
         "prelude",
         "tuples"
+      ]
+    },
+    "console": {
+      "type": "git",
+      "url": "https://github.com/purescript-lua/purescript-lua-console.git",
+      "rev": "f82835a0b873aafe6bd7b14dd30cc150553d4ab9",
+      "dependencies": [
+        "effect",
+        "prelude"
       ]
     },
     "const": {

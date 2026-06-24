@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Testing..."
+
+mkdir -p dist
+spago build
+pslua --foreign-path . --ps-output output --entry Test.Main --lua-output-file dist/test.lua
+
+if lua -e 'dofile("dist/test.lua").main()'; then
+    echo "✅ Tests succeeded."
+else
+    echo "❌ Tests failed."
+    exit 1
+fi

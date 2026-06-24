@@ -21,6 +21,12 @@ package:
     - tuples
     - unfoldable
     - unsafe-coerce
+  test:
+    main: Test.Main
+    dependencies:
+      - assert
+      - console
+      - effect
 workspace:
   backend:
     cmd: "true"
